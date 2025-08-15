@@ -10,10 +10,10 @@ export default defineConfig({
     tailwindcss(
       {
         theme: {
-  fontFamily: {
-    sans: ['Inter', 'sans-serif'],
-  }
-}
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
 
       }
     ),
