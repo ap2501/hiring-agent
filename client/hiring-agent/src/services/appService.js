@@ -29,7 +29,7 @@ export const addHistory = async (historyData, token) => {
 };
 
 export const deleteHistory = async (id, token) => {
-  const res = await axios.delete(`${API_URL}/history/${id}`, {
+  const res = await axios.delete(`${API_URL}/api/history/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return res.data;
