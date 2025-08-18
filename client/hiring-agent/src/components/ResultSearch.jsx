@@ -1,10 +1,59 @@
-import React from 'react';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 
-const ResultSearch = ({ data }) => {
-  if (!data) return null;
-
+const ResultSearch = ({ data, jd}) => {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
   // `data` is an array directly
   const results = Array.isArray(data) ? data : data.results || [];
+
+  if (!data) return null;
+
+  useEffect(() => {
+    const saveHistory = async () => {
+      try {
+        setLoading(true);
+
+        const token = user?.token || localStorage.getItem("authToken");
+        if (!token) {
+          throw new Error("No token found, please log in again.");
+        }
+
+        // ✅ If data is array, wrap inside object
+        const results =
+          Array.isArray(data) ? { items: data } : data;
+
+        const historyEntry = {
+          
+              title: "Frontend Dev Search",
+              jd: jd,
+              mode: "quick",
+              results: { candidates: data.length, items: data },
+        }
+
+        await axios.post(
+          `${import.meta.env.VITE_API_BASE_URL}/api/history`,
+          
+            historyEntry,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        console.log("✅ History saved!");
+      } catch (err) {
+        console.error("❌ Failed to save history", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if ((Array.isArray(data) && data.length > 0) || (!Array.isArray(data) && Object.keys(data).length > 0)) {
+      saveHistory();
+    }
+  }, [data,user]);
+  
 
   return (
     <div className="space-y-6">

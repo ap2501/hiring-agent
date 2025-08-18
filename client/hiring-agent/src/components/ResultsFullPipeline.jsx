@@ -1,4 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
+import axios from "axios";
+
+
 
 // Helper component for smooth show/hide transitions
 const CollapsibleSection = ({ isVisible, children }) => {
@@ -17,7 +21,7 @@ const CollapsibleSection = ({ isVisible, children }) => {
 };
 
 // Main Component
-const ResultsFullPipeline = ({ data }) => {
+const ResultsFullPipeline = ({ data, jd }) => {
   if (!data) return null;
 
   const [activeTab, setActiveTab] = useState('discovered');
@@ -35,6 +39,52 @@ const ResultsFullPipeline = ({ data }) => {
       });
     }
   }, [activeTab]);
+
+  const { user } = useAuth();
+  const savedRef = useRef(false);
+
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (savedRef.current) return;
+    const saveHistory = async () => {
+      try {
+        setLoading(true);
+
+        const token = user?.token || localStorage.getItem("authToken");
+        if (!token) {
+          throw new Error("No token found, please log in again.");
+        }
+
+        const historyEntry = {
+          
+              title: jd.split(' ').slice(0, 5).join(' '),
+              jd: jd,
+              mode: "full",
+              results: data,
+        }
+
+        await axios.post(
+          `${import.meta.env.VITE_API_BASE_URL}/api/history`,
+          
+            historyEntry,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        console.log("✅ History saved!");
+        savedRef.current = true; // mark as saved
+      } catch (err) {
+        console.error("❌ Failed to save history", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if ((Array.isArray(data) && data.length > 0) || (!Array.isArray(data) && Object.keys(data).length > 0)) {
+      saveHistory();
+    }
+  }, [data,user]);
 
 
   const toggleRankedExpansion = (index) => {

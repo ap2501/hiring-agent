@@ -1,15 +1,29 @@
-import { useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useAuth } from './context/AuthContext';
 import LoggedOutHome from "./components/LoggedOutHome";
 import Home from "./pages/Home";
+import HistoryPage from "./pages/HistoryPage"; // New page for specific history
+import LoadingState from './components/LoadingState';
 
 export default function App() {
-  
-  // For now, hardcode login state (later connect to Node auth)
-  const [loggedIn, setLoggedIn] = useState(false);
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <LoadingState />;
+  }
 
   return (
-    <div>
-      {loggedIn ? <Home /> : <LoggedOutHome />}
-    </div>
+    <Router>
+      <Routes>
+        {user ? (
+          <>
+            <Route path="/" element={<Home />} />
+            <Route path="/history/:id" element={<HistoryPage />} />
+          </>
+        ) : (
+          <Route path="*" element={<LoggedOutHome />} />
+        )}
+      </Routes>
+    </Router>
   );
 }

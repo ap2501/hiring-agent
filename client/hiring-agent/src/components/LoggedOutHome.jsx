@@ -1,7 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import ResultsFullPipeline from "./ResultsFullPipeline";
 import ResultSearch from "./ResultSearch";
 import { runFullPipeline, findCandidates } from "../services/aiService";
+import LoginModal from "./LoginModal"; // Assuming LoginModal.jsx exists
+import SignUpModal from "./SignUpModal"; // Assuming SignUpModal.jsx exists
 
 // --- Data for Examples ---
 const exampleJDs = [
@@ -55,7 +57,7 @@ const Spinner = ({ className }) => (
   <div className={`w-5 h-5 border-2 rounded-full animate-spin ${className}`}></div>
 );
 
-const Sidebar = ({ isSidePanelOpen, setIsSidePanelOpen }) => (
+const Sidebar = ({ isSidePanelOpen, setIsSidePanelOpen, onSignInClick, onSignUpClick }) => (
   <aside
     className={`fixed z-50 top-0 left-0 h-full w-80 bg-gray-900 border-r border-gray-800/50 transform transition-transform duration-300 ease-in-out ${
       isSidePanelOpen ? "translate-x-0" : "-translate-x-full"
@@ -82,16 +84,22 @@ const Sidebar = ({ isSidePanelOpen, setIsSidePanelOpen }) => (
       <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4">
         <h3 className="font-semibold text-amber-400 mb-1">Welcome to Guest Mode!</h3>
         <p className="text-sm text-amber-300/80 leading-relaxed">
-          We are still working on Login/SignUp features, you can still explore the app freely.
+          Login/SignUp To store past conversions.
         </p>
       </div>
     </div>
 
     <footer className="p-6 border-t border-gray-800/50 space-y-3">
-      <button className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:opacity-90 text-white py-3 px-4 rounded-lg font-semibold transition-opacity duration-300">
+      <button 
+        onClick={onSignUpClick}
+        className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:opacity-90 text-white py-3 px-4 rounded-lg font-semibold transition-opacity duration-300"
+      >
         Create a Free Account
       </button>
-      <button className="w-full bg-gray-800/50 hover:bg-gray-800 text-gray-200 py-3 px-4 rounded-lg font-medium transition-colors duration-300">
+      <button 
+        onClick={onSignInClick}
+        className="w-full bg-gray-800/50 hover:bg-gray-800 text-gray-200 py-3 px-4 rounded-lg font-medium transition-colors duration-300"
+      >
         Sign In
       </button>
     </footer>
@@ -131,6 +139,8 @@ const ExampleJDs = ({ onSelect }) => (
 
 const LoggedOutPage = () => {
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
   const [jd, setJd] = useState("");
   const [mode, setMode] = useState(null);
   const [results, setResults] = useState(null);
@@ -169,7 +179,12 @@ const LoggedOutPage = () => {
         />
       )}
 
-      <Sidebar isSidePanelOpen={isSidePanelOpen} setIsSidePanelOpen={setIsSidePanelOpen} />
+      <Sidebar 
+        isSidePanelOpen={isSidePanelOpen} 
+        setIsSidePanelOpen={setIsSidePanelOpen}
+        onSignInClick={() => setIsLoginModalOpen(true)}
+        onSignUpClick={() => setIsSignUpModalOpen(true)}
+      />
 
       <main className="lg:ml-80">
         <div className="max-w-4xl mx-auto p-6 lg:p-12">
@@ -207,13 +222,10 @@ const LoggedOutPage = () => {
                       <span className="text-sm text-gray-500">{jd.length.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <button onClick={handleRunSimpleSearch} disabled={loading} className="bg-gray-700/50 hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed text-white py-2 px-3 rounded-full font-semibold transition-all duration-200 flex items-center justify-center gap-2">
-                        <svg className="w-5 h-5 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                        <span className="hidden sm:inline">Quick Search</span>
-                      </button>
+                      
                       <button onClick={handleRunFullPipeline} disabled={loading} className="bg-emerald-500 hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed text-white py-2 px-3 rounded-full font-semibold transition-all duration-200 flex items-center justify-center gap-2">
                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-                        <span className="hidden sm:inline">Full Pipeline</span>
+                        <span className="hidden sm:inline">Analyze</span>
                       </button>
                     </div>
                   </div>
@@ -254,6 +266,16 @@ const LoggedOutPage = () => {
           </div>
         </div>
       </main>
+
+      {/* Render the modals */}
+      <LoginModal 
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+      />
+      <SignUpModal 
+        isOpen={isSignUpModalOpen}
+        onClose={() => setIsSignUpModalOpen(false)}
+      />
     </div>
   );
 };
