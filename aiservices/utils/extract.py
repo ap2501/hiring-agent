@@ -34,7 +34,7 @@ def extract_keywords_from_jd(job_description: str, max_keywords: int = 20):
 
     try:
         response = groq_client.chat.completions.create(
-            model="llama3-8b-8192",
+            model="llama-3.1-8b-instant",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.2,  # lower temp for more deterministic output
             max_tokens=400
